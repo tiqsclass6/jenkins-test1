@@ -40,3 +40,4 @@ This script automates the installation and configuration of Jenkins on an Amazon
 ## Notes
 - Make sure to replace `<your-key.pem>` and `<your-ec2-public-ip>` with your actual SSH key and EC2 instance IP address.
 - For security, restrict access to the Jenkins server by configuring security group rules or enabling HTTPS.
+# jenkins-test1
