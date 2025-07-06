@@ -1,8 +1,10 @@
 pipeline {
     agent any
+
     environment {
         AWS_REGION = 'us-east-1'
     }
+
     stages {
         stage('Set AWS Credentials') {
             steps {
@@ -14,25 +16,25 @@ pipeline {
                 }
             }
         }
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/tiqsclass6/jenkins-test1'
             }
         }
+
         stage('Initialize Terraform') {
             steps {
-                sh '''
-                terraform init
-                '''
+                sh 'terraform init'
             }
         }
+
         stage('Validate Terraform') {
             steps {
-                sh '''
-                terraform validate
-                '''
+                sh 'terraform validate'
             }
         }
+
         stage('Plan Terraform') {
             steps {
                 withCredentials([[
@@ -47,6 +49,7 @@ pipeline {
                 }
             }
         }
+
         stage('Apply Terraform') {
             steps {
                 input message: "Approve Terraform Apply?", ok: "Deploy"
@@ -62,7 +65,24 @@ pipeline {
                 }
             }
         }
+
+        stage('Destroy Terraform') {
+            steps {
+                input message: "Do you want to destroy the Terraform resources?", ok: "Destroy"
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'Jenkins1'
+                ]]) {
+                    sh '''
+                    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                    terraform destroy -auto-approve
+                    '''
+                }
+            }
+        }
     }
+
     post {
         success {
             echo 'Terraform deployment completed successfully!'
